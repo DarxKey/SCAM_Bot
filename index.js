@@ -1,1 +1,3 @@
-BOT_TOKEN = '1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw'
+import "./price_script.js"
+
+//console.writeln(priceFor1ss);
