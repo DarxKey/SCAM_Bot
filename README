@@ -1,0 +1,5 @@
+
+// Build docker image
+docker build -t scambot .
+// Create container with name "SCAMBot"
+docker run -d --name SCAMBot -t scambot
