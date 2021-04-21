@@ -17,7 +17,7 @@ var BUSD = "0xe9e7cea3dedca5984780bafc599bd69add087d56";
 var price = "undefined";
 var marketcap = "undefined";
 var burned = "undefined";
-var currentDate = new Date().getTime() - 30000;
+var chatsTime = [[1,1]]; //= new Date().getTime() - 30000;
 var formatAmount = (amount) => {
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -55,11 +55,37 @@ var init = async () => {
 
 init()
 
+function getChatIndex(chatlist, chatid){
+    console.log(chatlist);
+    for (var i=0; i<chatlist.length; i++) {
+        if(chatlist[i][0] == chatid) {
+            console.log("Chat id" + i);
+            return i;
+        }
+        
+        
+    }
+    console.log("PUSH");
+            chatlist.push([1,1]); 
+            return chatlist.length-1; 
+}
+
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 function sendPrice(ctx){
+    console.log("chatTiems lenght:"+chatsTime[0]);
+    var chatid = ctx.message.chat.id;
+    var index = getChatIndex(chatsTime, chatid);
+    var currentDate = chatsTime[index][1];
+    if(currentDate == 1) {
+        chatsTime[index][0] = chatid;
+        chatsTime[index][1] = new Date().getTime()-30000;
+        console.log("Nuova CHAT");
+    }
     var timeDelta = new Date().getTime() - currentDate;
+    //console.log(" Test "+ chatsTime[getChatIndex(chatsTime, chatid)]);
+    //console.log("Timedelta:" + timeDelta);
     if(timeDelta > 30000)
     {
 ctx.reply(`🚀 SCAM Token🔓
@@ -78,7 +104,8 @@ ctx.reply(`🚀 SCAM Token🔓
 
 🥇🔓⭐️`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
 
-    currentDate = new Date().getTime();
+    chatsTime[index][1] = new Date().getTime();
+    
     }
     else{
         ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" )
@@ -91,7 +118,7 @@ bot.start((ctx) => ctx.reply('Welcome'))
 bot.command('price',async (ctx) => {sendPrice(ctx)})
 bot.on('sticker', (ctx) => ctx.reply('👍'))
 bot.hears('hi', (ctx) => ctx.reply('Hey there'))
-bot.launch()
+bot.launch((ctx) => chatsTime[getChatIndex(chatsTime, ctx.message.chat.id)] = new Date().getTime()-30000)
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
