@@ -1,6 +1,6 @@
 
 
-import { Telegraf } from 'telegraf'
+import { Telegraf} from 'telegraf'
 
 import Web3 from 'web3'
 var web3 = new Web3('https://bsc-dataseed1.binance.org:443');
@@ -17,7 +17,7 @@ var BUSD = "0xe9e7cea3dedca5984780bafc599bd69add087d56";
 var price = "undefined";
 var marketcap = "undefined";
 var burned = "undefined";
-var chatsTime = [[1,1]]; //= new Date().getTime() - 30000;
+var chatsVar = [[1,1,[1]]]; //= new Date().getTime() - 30000;
 var formatAmount = (amount) => {
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -74,29 +74,39 @@ function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 function sendPrice(ctx){
-    console.log("chatTiems lenght:"+chatsTime[0]);
+    console.log("chatTiems lenght:"+chatsVar[0]);
     var chatid = ctx.message.chat.id;
-    var index = getChatIndex(chatsTime, chatid);
-    var currentDate = chatsTime[index][1];
+    var chatmessage = ctx.message.message_id.toString();
+    var index = getChatIndex(chatsVar, chatid);
+    var messages = chatsVar[index][2];
+    var currentDate = chatsVar[index][1];
     if(currentDate == 1) {
-        chatsTime[index][0] = chatid;
-        chatsTime[index][1] = new Date().getTime()-30000;
+        chatsVar[index][0] = chatid;
+        chatsVar[index][1] = new Date().getTime()-30000;
+        chatsVar[index][2]= [chatmessage];
         console.log("Nuova CHAT");
     }
+    else{
+        messages.push(chatmessage)
+        chatsVar[index][2]= messages
+    }
+    
+    
+    
     var timeDelta = new Date().getTime() - currentDate;
-    //console.log(" Test "+ chatsTime[getChatIndex(chatsTime, chatid)]);
+    //console.log(" Test "+ chatsVar[getChatIndex(chatsVar, chatid)]);
     //console.log("Timedelta:" + timeDelta);
     if(timeDelta > 30000)
     {
 ctx.reply(`🚀 SCAM Token🔓
 
-⭐️ 1 mil. tokens = $`+price+` 
+⭐️ 1 mil. tokens = $`+price.toString()+`
 
-💴 Market Cap $`+marketcap+`
+💴 Market Cap = $`+marketcap+`
 
 💰 Supply 700t+
 
-💬 Holders 600+ 
+💬 Holders 800+ 
 
 🥞🐰 Buy/Sell <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a> 
 
@@ -104,21 +114,30 @@ ctx.reply(`🚀 SCAM Token🔓
 
 🥇🔓⭐️`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
 
-    chatsTime[index][1] = new Date().getTime();
+    chatsVar[index][1] = new Date().getTime();
     
     }
     else{
+        for(var i=0; i<chatsVar[index][2].length-1; i++)
+            {
+                var message_id = chatsVar[index][2][i];
+                //console.log(id)
+                ctx.telegram.deleteMessage(chatid, message_id)
+                
+            }
+        
         ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" )
+        
     }
 
 }
-const bot = new Telegraf('1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw', {polling: true})
+const bot = new Telegraf('434791317:AAH3gJ73HmAXbisPMubTGeFMFku9omksy8w', {polling: true}) //  '' 1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw
 
 bot.start((ctx) => ctx.reply('Welcome'))
 bot.command('price',async (ctx) => {sendPrice(ctx)})
 bot.on('sticker', (ctx) => ctx.reply('👍'))
 bot.hears('hi', (ctx) => ctx.reply('Hey there'))
-bot.launch((ctx) => chatsTime[getChatIndex(chatsTime, ctx.message.chat.id)] = new Date().getTime()-30000)
+bot.launch((ctx) => chatsVar[getChatIndex(chatsVar, ctx.message.chat.id)] = new Date().getTime()-30000)
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
