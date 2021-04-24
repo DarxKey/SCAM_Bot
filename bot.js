@@ -18,12 +18,13 @@ var price = "undefined";
 var marketcap = "undefined";
 var burned = "undefined";
 var chatsVar = [[1,1,[1]]]; //= new Date().getTime() - 30000;
+var txhistory = []
 var formatAmount = (amount) => {
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-var sell = "🔴"
-var buy = "🟢"
+var sell = "🟥"
+var buy = "🟩"
 
 var init = async () => {
 
@@ -53,81 +54,94 @@ var init = async () => {
         price = Math.round((price + Number.EPSILON) * 1000000) / 1000000
         marketcap = numberWithCommas(Math.round(shortCirc * (shortPrice - 0)));
         burned = Math.round(10000000000000000/dead); //numberWithCommas(Math.round(shortCirc * (dead - 0)));
-        var currentBlockNumber = await web3.eth.getBlockNumber();
-        var block = currentBlockNumber - 600;
-        await SCAM2.getPastEvents("Swap", {
-            fromBlock: currentBlockNumber,
-            //toBlock: 'latest',
-            filter: {
-              isError: 0,
-              txreceipt_status: 1
-            },
-            /*topics: [
-              web3.utils.sha3("Transfer(address,address,uint256)"),
-              null,
-              web3.utils.padLeft('0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F', 64)
-            ]*/
-          }).then((result) => {
-            result.forEach(function(tx) {
-              console.log("New tx")  
-              var transactionTx = tx.transactionHash       
-              var BNBin = tx.returnValues.amount1In
-              var BNBout = tx.returnValues.amount1Out
-              var SCAMin = tx.returnValues.amount0In
-              var SCAMout = tx.returnValues.amount0Out
-              if(BNBin == '0')
-              {
-                
-                
-                  SCAMin = SCAMin/1000000000
-                  BNBout = BNBout/1000000000000000000
-                  SCAMin = Math.round(SCAMin)
-                  BNBout = Math.round((BNBout + Number.EPSILON) * 100000) / 100000
-                  if(BNBout > 1)
-                {
-                    var sellobj = sell.repeat(BNBout)
-                }
-                else{
-                    var sellobj = sell
-                }
-                  bot.telegram.sendMessage("@scamrocket",  `👹 Sold `+SCAMin+` SCAM  for `+BNBout+` BNB on PancakeSwap
-
+        const currentBlockNumber = await web3.eth.getBlockNumber().then().catch((error) => console.log(error))
+        //var block = currentBlockNumber - 600;
+        try{
+            await SCAM2.getPastEvents("Swap", {
+                fromBlock: currentBlockNumber-5,
+                toBlock: 'latest',
+                filter: {
+                  isError: 0,
+                  txreceipt_status: 1
+                },
+                /*topics: [
+                  web3.utils.sha3("Transfer(address,address,uint256)"),
+                  null,
+                  web3.utils.padLeft('0x05fF2B0DB69458A0750badebc4f9e13aDd608C7F', 64)
+                ]*/
+              }).then((result) => {
+                result.forEach(function(tx) {
+                  console.log("New tx")  
+                  var transactionTx = tx.transactionHash
+                  if(!txhistory.find((tx) => {return tx == transactionTx})){
+                    txhistory.push(transactionTx)   
+                    if(txhistory.lenght> 50)
+                    {
+                        txhistory.pop() 
+                    }
+                    var BNBin = tx.returnValues.amount1In
+                    var BNBout = tx.returnValues.amount1Out
+                    var SCAMin = tx.returnValues.amount0In
+                    var SCAMout = tx.returnValues.amount0Out
+                    if(BNBin == '0')
+                    {
+                      
+                      
+                        SCAMin = SCAMin/1000000000
+                        BNBout = BNBout/1000000000000000000
+                        SCAMin = Math.round(SCAMin)
+                        BNBout = Math.round((BNBout + Number.EPSILON) * 100000) / 100000
+                        if(BNBout > 1)
+                      {
+                          var sellobj = sell.repeat(BNBout)
+                      }
+                      else{
+                          var sellobj = sell
+                      }
+                        bot.telegram.sendMessage("@scamrocket",  `👹 Sold `+SCAMin+` SCAM  for `+BNBout+` BNB on PancakeSwap
+      
 `+sellobj+`
 
-1 mil. SCAM  = `+price+`BNB
+⭐️ 1 mil. SCAM = <code>`+price+`</code> BNB
+💴 Market Cap = $`+marketcap+`
 📶 <a href="https://bscscan.com/tx/`+transactionTx+`">Tx Hash</a>
 ---------------------------
 🥞 Buy SCAM <a href="https://v1exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a>
 📈 <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">Bogged Chart</a>`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
-                  console.log('VENDEEEE')
-              }
-              else{
-                SCAMout = SCAMout/1000000000
-                BNBin = BNBin/1000000000000000000
-                SCAMout = Math.round(SCAMout)
-                BNBin = Math.round((BNBin + Number.EPSILON) * 100000) / 100000
-                if(BNBin > 1)
-                {
-                    var buyobj = buy.repeat(BNBin)
-                }
-                else{
-                    var buyobj = buy
-                }
-                
-                bot.telegram.sendMessage("@scamrocket",  `🚀 Buy `+SCAMout+` SCAM  for `+BNBin+` BNB on PancakeSwap
-
+        console.log('VENDEEEE')
+                    }
+                    else{
+                      SCAMout = SCAMout/1000000000
+                      BNBin = BNBin/1000000000000000000
+                      SCAMout = Math.round(SCAMout)
+                      BNBin = Math.round((BNBin + Number.EPSILON) * 100000) / 100000
+                      if(BNBin > 1)
+                      {
+                          var buyobj = buy.repeat(BNBin)
+                      }
+                      else{
+                          var buyobj = buy
+                      }
+                      
+                      bot.telegram.sendMessage("@scamrocket",  `🚀 Buy `+SCAMout+` SCAM  for `+BNBin+` BNB on PancakeSwap
+      
 `+buyobj+`
 
-1 mil. SCAM  = `+price+`BNB
+⭐️ 1 mil. SCAM = <code>`+price+`</code> BNB
+💴 Market Cap = $`+marketcap+`
 📶 <a href="https://bscscan.com/tx/`+transactionTx+`">Tx Hash</a>
 ---------------------------
 🥞 Buy SCAM <a href="https://v1exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a>
 📈 <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">Bogged Chart</a>`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
-                console.log('COMPRAAAAA')
-              }
-              })
-              
-          }).catch()
+                      console.log('COMPRAAAAA')
+                    }
+                    }
+                  }
+                  )
+                  
+              }).catch((error) => console.log(error))
+        }catch{console.log("ERRORE")}
+        
           
           //console.log(transferEvents)
     setTimeout(() => { init(); }, 5000);
