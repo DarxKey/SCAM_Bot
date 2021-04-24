@@ -56,8 +56,8 @@ var init = async () => {
         var currentBlockNumber = await web3.eth.getBlockNumber();
         var block = currentBlockNumber - 600;
         await SCAM2.getPastEvents("Swap", {
-            fromBlock: block,
-            toBlock: 'latest',
+            fromBlock: currentBlockNumber,
+            //toBlock: 'latest',
             filter: {
               isError: 0,
               txreceipt_status: 1
@@ -153,7 +153,7 @@ function getChatIndex(chatlist, chatid){
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-/*function sendPrice(ctx){
+function sendPrice(ctx){
     console.log("chatTiems lenght:"+chatsVar[0]);
     var chatid = ctx.message.chat.id;
     var chatmessage = ctx.message.message_id.toString();
@@ -212,15 +212,15 @@ function numberWithCommas(x) {
                 chatsVar[index][2].splice(i,1)
             }
         
-        ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" ).then((result) => {chatsVar[index][2].push(result.message_id)})
+        ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" ).then((result) => {chatsVar[index][2].push(result.message_id)}).catch()
         
     }
 
-}*/
+}
 const bot = new Telegraf('434791317:AAH3gJ73HmAXbisPMubTGeFMFku9omksy8w', {polling: true}) //  '' 1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw
 
 bot.start((ctx) => ctx.reply('Welcome' + ctx.message.chat.id))
-//bot.command('price',async (ctx) => {sendPrice(ctx)})
+bot.command('price',async (ctx) => {sendPrice(ctx)})
 bot.on('sticker', (ctx) => ctx.reply('👍'))
 bot.hears('hi', (ctx) => ctx.reply('Hey there'))
 bot.launch((ctx) => chatsVar[getChatIndex(chatsVar, ctx.message.chat.id)] = new Date().getTime()-30000)
