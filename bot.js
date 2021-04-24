@@ -80,15 +80,12 @@ function sendPrice(ctx){
     var index = getChatIndex(chatsVar, chatid);
     var messages = chatsVar[index][2];
     var currentDate = chatsVar[index][1];
+    ctx.telegram.deleteMessage(chatid, ctx.message.message_id)
     if(currentDate == 1) {
         chatsVar[index][0] = chatid;
         chatsVar[index][1] = new Date().getTime()-30000;
-        chatsVar[index][2]= [chatmessage];
+        chatsVar[index][2] = [1,]
         console.log("Nuova CHAT");
-    }
-    else{
-        messages.push(chatmessage)
-        chatsVar[index][2]= messages
     }
     
     
@@ -98,40 +95,49 @@ function sendPrice(ctx){
     //console.log("Timedelta:" + timeDelta);
     if(timeDelta > 30000)
     {
-ctx.reply(`🚀 SCAM Token🔓
+        //try{ctx.telegram.deleteMessage(chatid, chatsVar[index][2][0])}catch{}
+ ctx.reply(`🚀 SCAM Token🔓
 
-⭐️ 1 mil. tokens = $`+price.toString()+`
+⭐️ 1 mil. tokens = $`+price+`
 
 💴 Market Cap = $`+marketcap+`
 
 💰 Supply 700t+
 
-💬 Holders 800+ 
+💬 Holders 1000+ 
 
-🥞🐰 Buy/Sell <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a> 
+🥞🐰 Buy/Sell <a href="https://v1exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a> 
 
-📈 Chart <a href="https://poocoin.app/tokens/0x4a3027204a98231B53A0798fB373e3B5016eaf82">Poocoin</a>
+📈 Chart <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">BogTools</a>
 
-🥇🔓⭐️`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
+🛒 <a href="https://www.scamtoken.biz/howtobuy.html">How to buy $SCAM</a>
+
+⭐️⭐️⭐️⭐️⭐️`,{parse_mode: 'HTML', disable_web_page_preview:'True'}).then((result) => {
+    if(chatsVar[index][2][0] != 1){
+        ctx.telegram.deleteMessage(chatid, chatsVar[index][2][0])
+    }
+    chatsVar[index][2][0] = result.message_id
+    })
+
 
     chatsVar[index][1] = new Date().getTime();
     
     }
     else{
-        for(var i=0; i<chatsVar[index][2].length-1; i++)
+        for(var i=1; i<chatsVar[index][2].length; i++)
             {
                 var message_id = chatsVar[index][2][i];
                 //console.log(id)
                 ctx.telegram.deleteMessage(chatid, message_id)
-                
+                chatsVar[index][2].splice(i,1)
             }
         
-        ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" )
+        ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" ).then((result) => {chatsVar[index][2].push(result.message_id)})
         
     }
 
 }
-const bot = new Telegraf('434791317:AAH3gJ73HmAXbisPMubTGeFMFku9omksy8w', {polling: true}) //  '' 1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw
+const bot = new Telegraf('1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw', {polling: true}) //  '' 1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw
 
 bot.start((ctx) => ctx.reply('Welcome'))
 bot.command('price',async (ctx) => {sendPrice(ctx)})
