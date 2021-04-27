@@ -55,13 +55,13 @@ var init = async () => {
         marketcap = numberWithCommas(Math.round(shortCirc * (shortPrice - 0)));
         burned = Math.round(10000000000000000/dead); //numberWithCommas(Math.round(shortCirc * (dead - 0)));
     }
-    catch{console.log("MATH error web3")}
+    catch{console.log("MATH ERROR web3")}
         await web3.eth.getBlockNumber().then((currentBlockNumber) => {
         //var block = currentBlockNumber - 600;
         
             SCAM2.getPastEvents("Swap", {
-                fromBlock: currentBlockNumber-20000,
-                toBlock: currentBlockNumber-15000,
+                fromBlock: currentBlockNumber-5,
+                toBlock: 'latest',
                 filter: {
                   isError: 0,
                   txreceipt_status: 1
@@ -76,9 +76,9 @@ var init = async () => {
                   console.log("New tx")  
                   var transactionTx = tx.transactionHash
                   if(!txhistory.find((tx) => {return tx == transactionTx})){
-                    txhistory.push(transactionTx)   
+                       
                     console.log(txhistory.length)
-                    if(txhistory.length> 5)
+                    if(txhistory.length> 500)
                     {
                         console.log("POP TX")
                         txhistory.pop() 
@@ -102,7 +102,7 @@ var init = async () => {
                       else{
                           var sellobj = sell
                       }
-                        bot.telegram.sendMessage("320977034",  `👹 Sold `+SCAMin+` SCAM  for `+BNBout+` BNB on PancakeSwap
+                        bot.telegram.sendMessage("@scamrocket",  `👹 Sold `+SCAMin+` SCAM  for `+BNBout+` BNB on PancakeSwap
       
 `+sellobj+`
 
@@ -111,7 +111,9 @@ var init = async () => {
 📶 <a href="https://bscscan.com/tx/`+transactionTx+`">Tx Hash</a>
 ---------------------------
 🥞 Buy SCAM <a href="https://v1exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a>
-📈 <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">Bogged Chart</a>`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
+📈 <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">Bogged Chart</a>`,{parse_mode: 'HTML', disable_web_page_preview:'True'}).then(()=> {
+    txhistory.push(transactionTx)
+}).catch((err) => {console.log(err)})
         console.log('VENDEEEE')
                     }
                     else{
@@ -127,7 +129,7 @@ var init = async () => {
                           var buyobj = buy
                       }
                       
-                      bot.telegram.sendMessage("320977034",  `🚀 Buy `+SCAMout+` SCAM  for `+BNBin+` BNB on PancakeSwap
+                      bot.telegram.sendMessage("@scamrocket",  `🚀 Buy `+SCAMout+` SCAM  for `+BNBin+` BNB on PancakeSwap
       
 `+buyobj+`
 
@@ -136,10 +138,15 @@ var init = async () => {
 📶 <a href="https://bscscan.com/tx/`+transactionTx+`">Tx Hash</a>
 ---------------------------
 🥞 Buy SCAM <a href="https://v1exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a>
-📈 <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">Bogged Chart</a>`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
+📈 <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">Bogged Chart</a>`,{parse_mode: 'HTML', disable_web_page_preview:'True'}).then(()=> {
+    txhistory.push(transactionTx)
+}).catch((err) => {console.log(err)})
                       console.log('COMPRAAAAA')
+                      
                     }
+                    
                     }
+                    
                   }
                   )
                   
@@ -148,11 +155,13 @@ var init = async () => {
         
           
           //console.log(transferEvents)
-    setTimeout(() => { init(); }, 10000);
+    setTimeout(() => { init(); }, 5000);
 }
 
 init()
-
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 function getChatIndex(chatlist, chatid){
     console.log(chatlist);
     for (var i=0; i<chatlist.length; i++) {
