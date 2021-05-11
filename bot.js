@@ -1,6 +1,6 @@
 
 
-import { Telegraf } from 'telegraf'
+import { Telegraf} from 'telegraf'
 
 import Web3 from 'web3'
 var web3 = new Web3('https://bsc-dataseed1.binance.org:443');
@@ -17,13 +17,14 @@ var BUSD = "0xe9e7cea3dedca5984780bafc599bd69add087d56";
 var price = "undefined";
 var marketcap = "undefined";
 var burned = "undefined";
-var chatsTime = [[1,1]]; //= new Date().getTime() - 30000;
+var lastWelcome
+var chatsVar = [[1,1,[1]]]; //= new Date().getTime() - 30000;
 var formatAmount = (amount) => {
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 var init = async () => {
-
+  
         var amount = web3.utils.toWei("1");
 
         var busdPAir = await panCakeRouter.methods.getAmountsOut(amount, [WBNB, BUSD]).call();
@@ -53,7 +54,7 @@ var init = async () => {
     setTimeout(() => { init(); }, 5000);
 }
 
-init()
+init().then().catch((er) => console.log(er))
 
 function getChatIndex(chatlist, chatid){
     console.log(chatlist);
@@ -74,52 +75,107 @@ function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 function sendPrice(ctx){
-    console.log("chatTiems lenght:"+chatsTime[0]);
+    console.log("chatTiems lenght:"+chatsVar[0]);
     var chatid = ctx.message.chat.id;
-    var index = getChatIndex(chatsTime, chatid);
-    var currentDate = chatsTime[index][1];
+    var chatmessage = ctx.message.message_id.toString();
+    var index = getChatIndex(chatsVar, chatid);
+    var messages = chatsVar[index][2];
+    var currentDate = chatsVar[index][1];
+    ctx.telegram.deleteMessage(chatid, ctx.message.message_id)
     if(currentDate == 1) {
-        chatsTime[index][0] = chatid;
-        chatsTime[index][1] = new Date().getTime()-30000;
+        chatsVar[index][0] = chatid;
+        chatsVar[index][1] = new Date().getTime()-30000;
+        chatsVar[index][2] = [1,]
         console.log("Nuova CHAT");
     }
+    
+    
+    
     var timeDelta = new Date().getTime() - currentDate;
-    //console.log(" Test "+ chatsTime[getChatIndex(chatsTime, chatid)]);
+    //console.log(" Test "+ chatsVar[getChatIndex(chatsVar, chatid)]);
     //console.log("Timedelta:" + timeDelta);
     if(timeDelta > 30000)
-    {
-ctx.reply(`🚀 SCAM Token🔓
+    {init().then().catch((er) => console.log(er))
+        //try{ctx.telegram.deleteMessage(chatid, chatsVar[index][2][0])}catch{}
+ ctx.reply(`🚀 SCAM Token🔓
 
-⭐️ 1 mil. tokens = $`+price+` 
+⭐️ 1 mil. tokens = $`+price+`
 
-💴 Market Cap $`+marketcap+`
+💴 Market Cap = $`+marketcap+`
 
 💰 Supply 700t+
 
-💬 Holders 600+ 
+💬 Holders 1000+ 
 
-🥞🐰 Buy/Sell <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a> 
+🥞🐰 Buy/Sell <a href="https://v1exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82">PancakeSwap</a> 
 
-📈 Chart <a href="https://poocoin.app/tokens/0x4a3027204a98231B53A0798fB373e3B5016eaf82">Poocoin</a>
+📈 Chart <a href="https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82">BogTools</a>
 
-🥇🔓⭐️`,{parse_mode: 'HTML', disable_web_page_preview:'True'})
+🛒 <a href="https://www.scamtoken.biz/howtobuy.html">How to buy $SCAM</a>
 
-    chatsTime[index][1] = new Date().getTime();
+⭐️⭐️⭐️⭐️⭐️`,{parse_mode: 'HTML', disable_web_page_preview:'True'}).then((result) => {
+    if(chatsVar[index][2][0] != 1){
+        ctx.telegram.deleteMessage(chatid, chatsVar[index][2][0])
+    }
+    chatsVar[index][2][0] = result.message_id
+    })
+
+
+    chatsVar[index][1] = new Date().getTime();
     
     }
     else{
-        ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" )
+        for(var i=1; i<chatsVar[index][2].length; i++)
+            {
+                var message_id = chatsVar[index][2][i];
+                //console.log(id)
+                ctx.telegram.deleteMessage(chatid, message_id)
+                chatsVar[index][2].splice(i,1)
+            }
+        
+        ctx.reply("Wait before relaunch command " + (30-(Math.round(timeDelta / 1000)))+ "s" ).then((result) => {chatsVar[index][2].push(result.message_id)})
+        
     }
 
 }
-const bot = new Telegraf('1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw', {polling: true})
-
-bot.start((ctx) => ctx.reply('Welcome'))
+const bot = new Telegraf('1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw', {polling: true}) //  '' 1647171242:AAFUsaaw3xy3ORzd9NSSqNMiPW4Lk1kWPUw
+const inlineMessageRatingKeyboard = [[
+  { text: '🥞 Buy on PancakeSwap 🥞', url: 'https://v1exchange.pancakeswap.finance/#/swap?outputCurrency=0x4a3027204a98231b53a0798fb373e3b5016eaf82' }
+  
+],[
+  { text: '📈 Price chart 📈', url: 'https://charts.bogged.finance/?token=0x4a3027204a98231B53A0798fB373e3B5016eaf82' }
+],
+[
+  { text: 'Website', url: 'https://www.scamtoken.biz' },
+  { text: 'Reddit', url: 'https://www.reddit.com/r/SCAM_Token/' }
+]];
+bot.start((ctx) => ctx.reply('Welcome to the SCAM Token community!'))
 bot.command('price',async (ctx) => {sendPrice(ctx)})
-bot.on('sticker', (ctx) => ctx.reply('👍'))
-bot.hears('hi', (ctx) => ctx.reply('Hey there'))
-bot.launch((ctx) => chatsTime[getChatIndex(chatsTime, ctx.message.chat.id)] = new Date().getTime()-30000)
-
+bot.on('new_chat_members', (ctx) => {
+    try{
+        if(lastWelcome != null) {ctx.telegram.deleteMessage(ctx.message.chat.id, lastWelcome)}
+    }catch{
+        console.log("Messaggio non trovato!")
+    }
+    
+    if(ctx.from.username != null){
+        var user = ctx.from.username
+    }else{
+        var user = "Anonymous"
+    }
+    ctx.reply('Welcome '+user+'!',{reply_markup: JSON.stringify({ inline_keyboard: inlineMessageRatingKeyboard })}).then((result) => {lastWelcome = result.message_id}).catch()
+})
+bot.command('info', (ctx) => ctx.reply('Welcome to SCAM Token community!',{reply_markup: JSON.stringify({ inline_keyboard: inlineMessageRatingKeyboard })}))
+//bot.on('sticker', (ctx) => ctx.reply('👍'))
+//bot.hears('hi', (ctx) => ctx.reply('Hey there'))
+bot.launch((ctx) => chatsVar[getChatIndex(chatsVar, ctx.message.chat.id)] = new Date().getTime()-30000)
+bot.on('afterDeleteMessage',(ctx) => {
+    console.log("QUI")
+    if(ctx.message.chat.id == lastWelcome)
+    {
+        lastWelcome = null
+    }
+})
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
